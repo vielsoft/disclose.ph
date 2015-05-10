@@ -1,0 +1,171 @@
+<?php
+/**
+ * @file
+ * Provides a field formatter for displaying multi-value fields in a Masonry
+ * layout.
+ */
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+function masonry_fields_field_formatter_info_alter(&$info) {
+  $field_types = masonry_fields_field_types();
+  $default_options = masonry_default_options();
+
+  // Set default values for new Masonry formatter
+  foreach ($field_types as $field => $formatters) {
+    foreach ($formatters as $formatter) {
+      if (!empty($info[$formatter])) {
+        $info[$formatter]['settings']['masonry'] = FALSE;
+        foreach ($default_options as $option => $default_value) {
+          $info[$formatter]['settings'][$option] = $default_value;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_formatter_settings_form_alter().
+ */
+function masonry_fields_field_formatter_settings_form_alter(array &$settings_form, array $context) {
+  if (masonry_fields_formatter_supported($context)) {
+    $options = $context['instance']['display'][$context['view_mode']]['settings'];
+
+    // Add Masonry options to formatter settings form
+    $settings_form['masonry'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Enable Masonry'),
+      '#description' => t("Displays items in a Masonry layout."),
+      '#default_value' => $options['masonry'],
+    );
+    if (masonry_installed()) {
+      masonry_add_options_to_form($settings_form, $options);
+
+      // Only show options when Masonry is enabled
+      foreach (masonry_default_options() as $option => $default_value) {
+        $settings_form[$option]['#states']['visible']['input.form-checkbox[name$="[masonry]"]'] = array('checked' => TRUE);
+      }
+    }
+    else {
+      // Disable Masonry as plugin is not installed
+      $settings_form['masonry']['#disabled'] = TRUE;
+      $settings_form['masonry']['#description'] = t('This option has been disabled as the jQuery Masonry plugin is not installed.');
+    }
+  }
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary_alter().
+ */
+function masonry_fields_field_formatter_settings_summary_alter(&$summary, array $context) {
+  if (masonry_fields_formatter_supported($context)) {
+    $options = $context['instance']['display'][$context['view_mode']]['settings'];
+
+    if (!empty($summary)) {
+      $summary .= '<br />';
+    }
+
+    // Display Masonry's status
+    if (masonry_installed()) {
+      if ($options['masonry']) {
+        $summary .= t('Masonry: Enabled');
+      }
+      else {
+        $summary .= t('Masonry: Disabled');
+      }
+    }
+    else {
+      $summary .= t('Masonry: Not installed');
+    }
+  }
+}
+
+/**
+ * Check if a given field formatter is supported.
+ *
+ * @param $context
+ *   The $context array provided by the Field Formatter Settings module. See
+ *   field_formatter_settings.api.php for more information.
+ *
+ * @return
+ *   A boolean indicating the supported status.
+ */
+function masonry_fields_formatter_supported($context) {
+  $formatter = $context['instance']['display'][$context['view_mode']];
+
+  // Fields in Views aren't supported
+  if ($context['instance']['entity_type'] == 'ctools' && $context['instance']['bundle'] == 'ctools') {
+    return FALSE;
+  }
+
+  // Get supported field types
+  $field_types = masonry_fields_field_types();
+
+  // Return TRUE for supported formatters with multi-value fields
+  $field_type_supported = array_key_exists($context['field']['type'], $field_types);
+  $formatter_supported = $field_type_supported && in_array($formatter['type'], $field_types[$context['field']['type']]);
+  $multi_value_field = ($context['field']['cardinality'] > 1) || ($context['field']['cardinality'] == FIELD_CARDINALITY_UNLIMITED);
+  if ($formatter_supported && $multi_value_field) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for theme_field().
+ */
+function masonry_fields_preprocess_field(&$variables) {
+  $element = $variables['element'];
+
+  // Get field formatter settings
+  $options = field_formatter_settings_get_instance_display_settings($element['#entity_type'], $element['#field_name'], $element['#bundle'], $element['#view_mode']);
+
+  // Display field items in a Masonry layout
+  if ($options['masonry']) {
+    $container = '.field-name-' . $variables['field_name_css'] . ' .field-items';
+    $options['masonry_item_selector'] = '.field-item';
+    masonry_apply($container, $options);
+  }
+}
+
+/**
+ * Get a list of supported field types and their formatters.
+ *
+ * @return
+ *   An associative array where the keys are field types and the values are
+ *   arrays of formatter type names.
+ */
+function masonry_fields_field_types() {
+  // Core
+  $core_fields = array(
+    'image' => array(
+      'image',
+    ),
+    'text_long' => array(
+      'text_default',
+      'text_plain',
+      'text_trimmed',
+    ),
+    'text_with_summary' => array(
+      'text_default',
+      'text_plain',
+      'text_summary_or_trimmed',
+      'text_trimmed',
+    ),
+  );
+
+  // Add contrib modules' field types and formatters
+  $contrib_fields = module_invoke_all('masonry_fields_field_types');
+  $field_types = array_merge_recursive($core_fields, $contrib_fields);
+
+  // Remove duplicate formatters
+  foreach ($field_types as &$field_type) {
+    $field_type = array_unique($field_type);
+  }
+
+  return $field_types;
+}
+

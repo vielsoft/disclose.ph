@@ -1,0 +1,534 @@
+<?php
+
+/**
+ * @file
+ * Support for Facebook's Stream API.
+ *
+ * http://wiki.developers.facebook.com/index.php/Using_the_Open_Stream_API
+ * http://developers.facebook.com/docs/guides/policy/stream
+ *
+ * At the moment we support only fb_stream_publish_dialog() for
+ * writing to a stream via a javascript dialog.  The Stream API allows
+ * for much more, so eventually this module will do more.
+ */
+
+define('FB_STREAM_VAR_TOKEN', 'fb_stream_token');
+define('FB_STREAM_DIALOGS', 'fb_stream_dialogs');
+
+define('FB_STREAM_PERM_OVERRIDE', 'override facebook stream details');
+define('FB_STREAM_PERM_POST', 'post to site-wide facebook stream');
+
+define('FB_STREAM_OP_PRE_POST', 'fb_stream_op_pre_post');
+
+/**
+ * Implements hook_menu().
+ */
+function fb_stream_menu() {
+  $items = array();
+
+  $items[FB_PATH_ADMIN . '/fb_stream'] = array(
+    'title' => 'Stream Posts',
+    'access arguments' => array(FB_PERM_ADMINISTER),
+    'weight' => -1,
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('fb_stream_admin_settings'),
+    'file' => 'fb_stream.admin.inc',
+  );
+
+  return $items;
+}
+
+function fb_stream_permission() {
+  return array(
+    FB_STREAM_PERM_POST => array(
+      'title' => t('Post links to Facebook.com'),
+    ),
+    FB_STREAM_PERM_OVERRIDE => array(
+      'title' => t('Override post to Facebook defaults'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_node_insert().
+ *
+ * Post to facebook stream when new node is created.
+ */
+function fb_stream_node_insert($node) {
+  // Defer any contact with Facebook until later, after all node hooks have run.
+  // Facebook will visit our URL to get any graph tags, but Drupal will not
+  // properly return the page if insert is not complete.
+  drupal_register_shutdown_function('fb_stream_post_on_shutdown',$node);
+}
+
+/**
+ * Implements hook_node_update().
+ *
+ * Post to facebook stream when new content is edited.
+ */
+function fb_stream_node_update($node) {
+  drupal_register_shutdown_function('fb_stream_post_on_shutdown',$node);
+}
+
+/**
+ * Logic to post to a Facebook stream.  This callback is invoked as the page
+ * request shuts down, as late as possible in the order.  This runs after
+ * all node insert/update hooks have completed.
+ */
+function fb_stream_post_on_shutdown($node) {
+  if (TRUE) { // Maintain same level of indentation as D6 branch, so that patches easily apply.
+    if (!empty($node->fb_stream_do_post)) {
+      $node_url = url("node/$node->nid", array('absolute' => TRUE));
+
+      $body = field_get_items('node', $node, 'body');
+      $params = array(
+        'access_token' => $node->fb_stream_from_token,
+        'message' => $node->fb_stream_message,
+        'link' => $node_url,
+        'name' => $node->title,
+        'description' => text_summary($body[0]['value']),
+        'caption' => variable_get('site_name', ''),
+        'actions' => json_encode(array(
+                                   'name' => t('View More'),
+                                   'link' => $node_url,
+                                 )),
+        'method' => 'POST',
+      );
+
+      // Let third parties alter params.
+      $params = fb_invoke(FB_STREAM_OP_PRE_POST, array('node' => $node), $params, 'fb_stream');
+      if ($params['name']) {
+
+        // http://stackoverflow.com/questions/4652628/what-markup-is-allowed-in-the-description-of-a-facebook-feed-post
+        $params['description'] = strip_tags($params['description'], '<b><i><small><center>');
+
+        try {
+          $result = fb_graph($node->fb_stream_to . '/feed', $params, 'POST');
+          // ID returned to us is not a normal graph ID.  We can't query it, but can build a permalink.
+          if ($result['id']) {
+            $exploded_result = explode('_', $result['id']);
+            $story_fbid = 'story_fbid=' . $exploded_result[1];
+            $id = 'id=' . $exploded_result[0];
+            $link = FB_FACEBOOK_BASE_URL . '/' . 'permalink.php?' . $story_fbid . '&' . $id ;
+
+            drupal_set_message(t('Posted %node to <a href="!url" target="_blank">Facebook</a>.', array(
+                                   '!url' => $link,
+                                   '%node' => $node->title,
+                                 )));
+          }
+        }
+        catch (Exception $e) {
+          $msg = t('Failed to post content to Facebook.');
+          drupal_set_message($msg, 'warning');
+          fb_log_exception($e, $msg);
+        }
+      }
+      else {
+        // Cannot post without link name.  If here, implement hook_fb_stream() to ensure name is set.
+        drupal_set_message(t('Cannot post <a href=!link>%title (node/!nid)</a> to facebook.  Post has no name.', array(
+                               '!nid' => $node->nid,
+                               '!link' => $node_url,
+                               '%title' => $node->title,
+                             )), 'warning');
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function fb_stream_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['#node_type']) && 'node_type_form' == $form_id) {
+    fb_stream_node_settings_form($form);
+  }
+  elseif (!empty($form['#node_edit_form'])) {
+    $type = $form['type']['#value'];
+    // TODO: display a connect link for individual user even when token is not configured.
+    if (variable_get('fb_stream_enabled__' . $type, FALSE) &&
+        ($token = variable_get(FB_STREAM_VAR_TOKEN, NULL)) &&
+        user_access(FB_STREAM_PERM_POST)) {
+
+      // Defaults configured per node type.
+      $from_token = variable_get('fb_stream_from_token__' . $type, $token);
+      $from_id = variable_get('fb_stream_from__' . $type, NULL);
+      $to_id = variable_get('fb_stream_to__' . $type, NULL);
+
+      try {
+        // TODO: consolodate graph api, use batch/cache.
+        $to = fb_graph($to_id, array('access_token' => $token));
+        $via = fb_graph('app', array('access_token' => $token));
+        $me = fb_graph('me', array('access_token' => $token));
+
+        $form['fb_stream'] = array(
+          '#type' => 'fieldset',
+          '#title' => t('Post to Facebook'),
+          '#collapsible' => TRUE,
+          '#collapsed' => TRUE,
+          '#group' => 'additional_settings',
+          '#attributes' => array(
+            'class' => array('fb-node-settings-form'),
+          ),
+        );
+
+        // These args will be passed to t() more than once in the code that follows.
+        $t_args = array(
+          '%to' => _fb_get_name($to),
+          '%via' => _fb_get_name($via),
+          '%me' => _fb_get_name($me),
+        );
+
+        $form['fb_stream']['fb_stream_do_post'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Post to Facebook'),
+          '#description' => ($to['id'] == $me['id']) ? t('Post this content to %to on Facebook via %via application.', $t_args) : t('Post this content to %to on Facebook via the %via application and %me\'s account.', $t_args),
+        );
+
+        // Default details configured per node type.
+        $form['fb_stream']['override']['fb_stream_to'] = array(
+          '#type' => 'value',
+          '#value' => $to_id,
+        );
+
+        if (user_access(FB_STREAM_PERM_OVERRIDE)) {
+          // Allow override of author/wall.
+          $to_options = array(); // IDs of user/page walls.
+          $from_options = array(); // deprecated.  No longer used. Clean this up! XXX
+          $from_tokens = array(); // Access tokens for posting as Page (not user).
+
+          fb_stream_post_options($token, $to_options, $from_options, $from_tokens);
+
+          $form['fb_stream']['override'] = array(
+            '#type' => 'fieldset',
+            '#title' => t('Override defaults (advanced)'),
+            '#collapsible' => TRUE,
+            '#collapsed' => TRUE,
+          );
+
+          $form['fb_stream']['override']['fb_stream_to'] = array(
+            '#type' => 'select',
+            '#title' => t("Post to Wall"),
+            '#options' => $to_options,
+            '#description' => t('Post to which Facebook Wall?'),
+            '#default_value' => $to_id,
+          );
+
+          // We'll need the token that corresponds to our "from" option.  We don't want to include tokens directly in the form, for security.
+          $form['#fb_stream_from_tokens'] = $from_tokens;
+          $form['#validate'][] = 'fb_stream_node_form_validate';
+        }
+
+        $form['fb_stream']['fb_stream_from_token'] = array(
+          // placeholder.  See fb_stream_node_settings_form_validate().
+          '#type' => 'value',
+          '#value' => $from_token,
+        );
+
+        $form['fb_stream']['fb_stream_message'] = array(
+          '#type' => 'textfield',
+          '#title' => 'Message',
+          '#default_value' => '',
+          '#description' => 'Optionally, a brief message to precede the link.',
+        );
+
+      }
+      catch (Exception $e) {
+        drupal_set_message(t('Post to facebook options not available.  Possibly a temporary failure to reach facebook.com, or an expired access token.'), 'warning');
+        fb_log_exception($e, t('Failed to access facebook altering node-form.'));
+      }
+    }
+  }
+
+}
+
+/**
+ * Helper function to add post options to a form.
+ */
+function fb_stream_post_options($token, &$to_options, &$from_options, &$from_tokens) {
+  if (!$token) {
+    return;
+  }
+
+  try {
+    // TODO: consolodate graph api, use batch. And cache.
+    $me = fb_graph('me', array('access_token' => $token));
+
+    // Ideally, we could inspect $me to determine whether it is a user account or something else (i.e. a page).  Until we figure out how to do that, we use the fact that me/accounts can be queried for users, but pages will throw exception.
+
+    // "to" options are facebook ids.
+    $to_options[$me['id']] = _fb_get_name($me);
+
+    // "from" options are ids.
+    $from_options[$me['id']] = _fb_get_name($me);
+
+    // We will also need the access token that corresponds to "from" options.
+    $from_tokens[$me['id']] = $token;
+
+    try {
+      $accounts = fb_graph('me/accounts', array('access_token' => $token));
+
+      foreach ($accounts['data'] as $account) {
+        // @TODO add only if access_token found
+        if (!isset($account['name'])) {
+          // @TODO handle applications more smarter.
+          $name = $account['category'] . ' ' . $account['id'];
+        }
+        else {
+          $name = $account['name'];
+        }
+        $to_options[$account['id']] = $name;
+
+        if (!empty($account['access_token'])) {
+          $from_options[$account['id']] = $name;
+          $from_tokens[$account['id']] = $account['access_token'];
+        }
+      }
+    }
+    catch (Exception $e) {
+      // If we could not query me/accounts, we only have one option.
+    }
+  }
+  catch (Exception $e) {
+    // TODO: link to token admin page.
+    fb_log_exception($e, t('Failed to get facebook post options.'));
+  }
+}
+
+/**
+  * Helper function for hook_form_alter() renders the settings per node-type.
+  */
+function fb_stream_node_settings_form(&$form) {
+  $node_type = $form['#node_type']->type;
+
+  $token = variable_get(FB_STREAM_VAR_TOKEN, '');
+  $to_options = array();
+  $from_options = array();
+  $from_tokens = array();
+
+  // Include options in the form.
+  $form['fb_stream'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Facebook Posts'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#attributes' => array(
+      'class' => array('fb-node-type-settings-form'),
+    ),
+
+  );
+
+  // Use $var_prefix because Drupal will append $node_type when saving variables.
+  $var_prefix = 'fb_stream_enabled_';
+  $var = $var_prefix . '_' . $node_type;
+  $form['fb_stream'][$var_prefix] = array( // $var_prefix looks wrong, but is right.
+    '#type' => 'checkbox',
+    '#title' => t('Enable Post to Facebook for this content type.'),
+    '#default_value' => variable_get($var, FALSE),
+  );
+
+  if (!$token) {
+    $form['fb_stream']['fb'] = array(
+      '#markup' => t('<a href=!url target=_blank>Configure settings</a>, then refresh this form to see all options.', array(
+                       '!url' => url(FB_PATH_ADMIN . '/fb_stream'),
+                     )),
+      '#prefix' => '<p>', '#suffix' => '</p>',
+    );
+
+    return;
+  }
+
+  try {
+    // Get the possible author/wall combinations from facebook.
+    fb_stream_post_options($token, $to_options, $from_options, $from_tokens);
+
+    // TODO: consolodate graph api, use batch. And cache.
+    $me = fb_graph('me', array('access_token' => $token));
+    $via = fb_graph('app', array('access_token' => $token));
+
+    $t_args = array(
+      '%from' => _fb_get_name($me),
+      '%via' => _fb_get_name($via),
+    );
+
+
+    $var_prefix = 'fb_stream_to_';
+    $var = $var_prefix . '_' . $node_type;
+    $form['fb_stream'][$var_prefix] = array(
+      '#type' => 'select',
+      '#title' => t("Post to wall"),
+      '#options' => $to_options,
+      '#description' => t('Post to which Facebook Wall?  If you don\'t see the options you expect, you may need a new <a href=!url target=_blank>access token</a>.', array(
+                        '!url' => url(FB_PATH_ADMIN . '/fb_stream'),
+                      )),
+      '#default_value' => variable_get($var, NULL),
+    );
+
+    // We'll need the token that corresponds to our "from" option.  We don't want to include tokens directly in the form, for security.
+    $form['#fb_stream_from_tokens'] = $from_tokens;
+    $form['#validate'][] = 'fb_stream_node_settings_form_validate';
+    $form['fb_stream']['fb_stream_from_token_'] = array(
+      // placeholder.  See fb_stream_node_settings_form_validate().
+      '#type' => 'value',
+      '#value' => NULL,
+    );
+  }
+  catch (Exception $e) {
+    // TODO: link to token admin page.
+    fb_log_exception($e, t('Failed to access facebook using the fb_stream token (node settings form).'));
+  }
+}
+
+function fb_stream_node_settings_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  if ($to_id = $values['fb_stream_to_']) {
+    // Save the token for the facebook wall.
+    form_set_value($form['fb_stream']['fb_stream_from_token_'],
+      $form['#fb_stream_from_tokens'][$to_id], $form_state);
+  }
+}
+
+function fb_stream_node_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+
+  if (($to_id = $values['fb_stream_to']) &&
+    count($form['#fb_stream_from_tokens'])) {
+    form_set_value($form['fb_stream']['fb_stream_from_token'],
+      $form['#fb_stream_from_tokens'][$to_id], $form_state);
+  }
+}
+
+/**
+ * Gets the auto node title setting associated with the given content type.
+ */
+function fb_stream_get_setting($type) {
+  return variable_get('fb_stream_'. $type, FALSE);
+}
+
+
+/**
+ * Publish to a user's stream or update their status, via a dialog.
+ *
+ * Calling this method will, through javascript, add content to a
+ * user's wall or update their status.  The javascript will be written
+ * either during the current page request, or the next complete page
+ * that Drupal serves.  (So it is safe to call this during requests
+ * which end in a drupal_goto() rather than a page.)
+ *
+ * When invoked on an FBML canvas page request,
+ * http://wiki.developers.facebook.com/index.php/Facebook.streamPublish
+ * will be invoked.  When a Facebook Connect page,
+ * http://developers.facebook.com/docs/?u=facebook.jslib.FB.Connect.streamPublish
+ * will be called instead.  The result should be the same.
+ *
+ * @param $params
+ *   An associative array of parameters to pass to Facebook's API.
+ *   See Facebook's doc for additional detail.  Pass in strings and
+ *   data structures.  Drupal for Facebook will json encode them
+ *   before passing to javascript.  Use these keys:
+ *   - 'user_message'
+ *   - 'attachment'
+ *   - 'action_links'
+ *   - 'target_id'
+ *   - 'user_message_prompt'
+ *   - 'auto_publish'
+ *   - 'actor_id'
+ */
+function fb_stream_publish_dialog($params, $fb_app = NULL) {
+  if (!isset($_SESSION[FB_STREAM_DIALOGS])) {
+    $_SESSION[FB_STREAM_DIALOGS] = array();
+  }
+
+  if (!isset($fb_app)) {
+    $fb_app = $GLOBALS['_fb_app'];
+  }
+
+  if (!isset($_SESSION[FB_STREAM_DIALOGS][$fb_app->apikey])) {
+    $_SESSION[FB_STREAM_DIALOGS][$fb_app->apikey] = array();
+  }
+  $_SESSION[FB_STREAM_DIALOGS][$fb_app->apikey][] = $params;
+
+}
+
+/**
+ * Get the data for one or more stream dialogs.  Use this function in
+ * ajax callbacks, where you want to publish dialog(s) in response to
+ * javascript events.
+ */
+function fb_stream_get_stream_dialog_data($fb_app = NULL) {
+  if (!$fb_app)
+    $fb_app = $GLOBALS['_fb_app'];
+
+  if (isset($_SESSION[FB_STREAM_DIALOGS]) &&
+      isset($_SESSION[FB_STREAM_DIALOGS][$fb_app->apikey])) {
+    $data = $_SESSION[FB_STREAM_DIALOGS][$fb_app->apikey];
+    unset($_SESSION[FB_STREAM_DIALOGS][$fb_app->apikey]);
+    return $data;
+  }
+  else {
+    return array();
+  }
+}
+
+/**
+ * Implementation of hook_fb().
+ *
+ * When adding javascript to FBML and Conect pages, we add
+ */
+function fb_stream_fb($op, $data, &$return) {
+  if ($op == FB_OP_JS) {
+    $params_array = fb_stream_get_stream_dialog_data($data['fb_app']);
+    $js = fb_stream_js($params_array);
+    $return += $js;
+  }
+  if ($op == FB_OP_POST_INIT) {
+    drupal_add_js(drupal_get_path('module', 'fb_stream') . '/fb_stream.js');
+  }
+}
+
+/**
+ * Convert our data structure to javascript.
+ */
+function fb_stream_js($params_array) {
+  $return = array();
+  foreach ($params_array as $params) {
+    /*
+    $args = array();
+    // These are the defaults:
+    foreach (array(
+               'method' => '"stream.publish"',
+               'user_message' => '',
+               'attachment' => '{}',
+               'action_links' => '{}',
+               'target_id' => 'null',
+               'user_message_prompt' => 'null',
+               'auto_publish' => 'null',
+               'actor_id' => 'null',
+             ) as $key => $default) {
+      if (isset($params[$key])) {
+        // Encode the params passed to fb_stream_publish_dialog.
+        if (in_array($key, array('auto_publish'))) {
+          // no encoding
+          $args[$key] = $params[$key];
+        }
+        else {
+          $args[] = json_encode($params[$key]);
+        }
+
+      }
+      else {
+        // Use default
+        $args[] = $default;
+      }
+    }
+    */
+
+    $params['method'] = 'stream.publish';
+
+    // Add stream dialog javascript to a canvas page.
+    $return[] = "FB.ui(" . json_encode($params) . ");\n";
+  }
+
+  return $return;
+}

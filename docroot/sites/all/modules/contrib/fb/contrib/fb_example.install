@@ -1,0 +1,37 @@
+<?php
+/**
+ * @file
+ * Install file for fb_example.module.
+ * Set the weight of our module to be after og.
+ */
+
+
+/**
+ * Implements hook_install().
+ *
+ * Set weight so that fb_example comes after fb_user.
+ */
+function fb_example_install() {
+  // So we fall after og_vocab and og.
+  db_update('system')
+  ->fields(array(
+    'weight' => 3,
+  ))
+  ->condition('name', 'fb_example')
+  ->execute();
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Set weight so that fb_example comes after fb_user.
+ */
+function fb_example_update_7001() {
+  db_update('system')
+  ->fields(array(
+    'weight' => 3,
+  ))
+  ->condition('name', 'fb_example')
+  ->execute();
+  return $ret;
+}

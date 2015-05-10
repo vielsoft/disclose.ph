@@ -1,0 +1,42 @@
+{
+  "name": "disclose.ph",
+  "version": "1.0.0",
+  "description": "Disclose.ph js and css sources.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:geraldvillorente/disclose.ph.git"
+
+  },
+  "author": "geraldvillorente",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/geraldvillorente/disclose.ph/issues"
+  },
+  "homepage": "http://disclose.ph/",
+  "devDependencies": {
+    "gulp": "^3.8.10",
+    "gulp-clean": "^0.3.1",
+    "gulp-compass": "^2.0.3",
+    "gulp-concat": "^2.4.2",
+    "gulp-if": "^1.2.5",
+    "gulp-ignore": "^1.2.1",
+    "gulp-imagemin": "^2.0.0",
+    "gulp-jscs": "^1.3.1",
+    "gulp-jshint": "^1.9.0",
+    "gulp-notify": "^2.0.1",
+    "gulp-rename": "^1.2.0",
+    "gulp-replace": "^0.5.0",
+    "gulp-sequence": "^0.3.1",
+    "gulp-shell": "^0.2.11",
+    "gulp-sourcemaps": "^1.2.8",
+    "gulp-uglify": "^1.0.1",
+    "imagemin-pngquant": "^4.0.0",
+    "jscs": "^1.8.1",
+    "jshint-stylish": "^1.0.0",
+    "minimist": "^1.1.0"
+  },
+  "private": "false"
+}

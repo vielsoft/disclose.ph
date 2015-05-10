@@ -1,0 +1,15 @@
+name = Masonry Fields
+description = "Provides a field formatter for displaying multi-value fields in a Masonry layout."
+core = 7.x
+package = Masonry
+
+dependencies[] = masonry (>=2.x)
+dependencies[] = field_formatter_settings
+
+
+; Information added by drupal.org packaging script on 2013-06-16
+version = "7.x-1.0"
+core = "7.x"
+project = "masonry_fields"
+datestamp = "1371359154"
+

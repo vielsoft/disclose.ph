@@ -1,0 +1,77 @@
+<?php
+/**
+ * @file
+ * Install file for fb_user.module.
+ *
+ */
+
+/**
+ * Implement hook_install().
+ */
+function fb_user_install() {
+  _fb_user_install_set_weight();
+}
+
+/**
+ * Implement hook_uninstall().
+ */
+function fb_user_uninstall() {
+
+  foreach (array(FB_USER_VAR_USERNAME_STYLE,
+                 FB_USER_VAR_ALTER_REGISTER,
+                 FB_USER_VAR_ALTER_LOGIN,
+                 FB_USER_VAR_ALTER_LOGIN_BLOCK,
+                 FB_USER_VAR_ALTER_CONTACT,
+                 FB_USER_VAR_TEXT_REGISTER,
+                 FB_USER_VAR_TEXT_LOGIN,
+                 FB_USER_VAR_TEXT_LOGIN_BLOCK,
+           ) as $var) {
+    variable_del($var);
+  }
+}
+
+/**
+ * Usually it is best if fb_user_form_alter acts before third party modules.
+ * So, we lower the module weight here.
+ */
+function _fb_user_install_set_weight() {
+  db_query("UPDATE {system} SET weight=-1 WHERE name='fb_user'");
+}
+
+
+function fb_user_schema() {
+  // Note fb_user_app table has been moved to fb_user_app.module.
+
+  $schema['fb_user'] = array(
+    'fields' => array(
+      'uid' => array(
+        'type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE,
+      ),
+      'fbu' => array(
+        // http://forum.developers.facebook.net/viewtopic.php?pid=4676
+        'type' => 'int', 'size' => 'big', 'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('uid'),
+    'unique keys' => array(
+      'fbu' => array('fbu')),
+  );
+
+
+  return $schema;
+
+}
+
+// Drupal 7.x upgrade hooks
+/**
+ * Lower weight of fb_user.module so that it's hooks will be invoked before third-party modules.
+ */
+function fb_user_update_7001() {
+  _fb_user_install_set_weight();
+  $message = 'Lowered weight of fb_user.module, so that its hooks will be invoked before third-party modules.';
+  $args = array();
+  watchdog('fb_user', $message, $args, WATCHDOG_WARNING);
+  return t($message, $args);
+}
+
+

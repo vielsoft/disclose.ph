@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ * Install functions for fb_connect.module.
+ *
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+// TODO AVA Confirm this query
+function fb_connect_uninstall() {
+  db_query("DELETE FROM {block} WHERE module = 'fb_connect'");
+}

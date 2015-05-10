@@ -1,0 +1,9 @@
+#fb_invite_wrapper td {
+    vertical-align: top;
+    padding: 2em;
+}
+
+#fb_invite_wrapper td td {
+    vertical-align: middle;
+    padding: .2em;
+}

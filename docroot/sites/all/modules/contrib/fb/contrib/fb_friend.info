@@ -1,0 +1,15 @@
+name = FB Friend Features
+description = (fb_friend.module) DEPRECATED!  Facebook no longer supports API used by this module. Blocks for showing the current user's friends, sending them requests, etc.
+package = Drupal for Facebook - deprecated
+core = 6.x
+dependencies[] = fb
+dependencies[] = fb_form
+dependencies[] = fb_app
+
+
+; Information added by drupal.org packaging script on 2013-10-26
+version = "7.x-3.4"
+core = "7.x"
+project = "fb"
+datestamp = "1382817027"
+

@@ -1,0 +1,148 @@
+<?php
+/**
+ * @file
+ * Installs database tables and settings required by fb_app module.
+ *
+ */
+
+/**
+ * hook_install()
+ */
+function fb_app_install() {
+  // drupal_install_schema is called by Drupal
+  drupal_set_message(st('Facebook Application module installed. Please grant yourself <a href="!perm">permissions</a> and then browse to <a href="!create">Admin >> Structure >> Facebook Apps</a> to get started.', array('!perm' => url('admin/people/permissions'), '!create' => url('admin/structure/fb') /* FB_PATH_ADMIN */)));
+}
+
+/**
+ * hook_uninstall()
+ */
+function fb_app_uninstall() {
+  // drupal_uninstall_schema is called by Drupal
+}
+
+function fb_app_schema() {
+  $schema['fb_app'] = array(
+    'description' => 'Main fb_app table',
+    'fields' => array(
+      'fba_id' => array(
+        'description' => 'The primary identifier for an app.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE),
+      'status' => array(
+        'description' => 'Boolean indicating whether the app is enabled.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1),
+
+      // nid for backward-compatibility only.  DEPRECATED and will be removed!
+      'nid' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+
+      'label' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'Unique textual id for app.',
+      ),
+      'apikey' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'Provided by facebook, copy and pasted by user',
+      ),
+      'id' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'Provided by facebook, copy and pasted by user',
+      ),
+      'secret' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'Provided by facebook, copy and pasted by user',
+      ),
+      'canvas' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'We learn this from facebook app properties, facebook now calls it namespace',
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'We learn this from facebook app properties',
+      ),
+      'data' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => 'Module-specific additional settings.'),
+    ),
+    'unique keys' => array(
+      'apikey' => array('apikey'),
+      'label' => array('label'),
+    ),
+    'primary key' => array('fba_id'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Change app labels to all lower case.
+ *
+ */
+function fb_app_update_7301() {
+  // This include some code specific to fb_connect.module (because easier to do here than fb_connect.install).
+  $ret = array();
+  $query = db_query("SELECT fba_id, label FROM {fb_app} ORDER BY fba_id");
+  while ($app = $query->fetchObject()) {
+    //change label names to lowercase
+    $label_old = $app->label;
+    $label_new = strtolower($label_old);
+    if ($label_old != $label_new){
+
+      // Change app name to lowercase.
+      $ret[] = db_update('fb_app')
+        ->fields(array('label' => $label_new))
+        ->condition('fba_id', $app->fba_id)
+        ->execute();
+
+      drupal_set_message(t("Changed fb application name from %label_old to %label_new. Please adjust any custom code or settings which rely on app's label.", array(
+                             '%label_old' => $label_old,
+                             '%label_new' => $label_new,
+                           )), 'warning');
+
+      // begin fb_connect.module settings which use label.
+      if (variable_get('fb_connect_primary_label', NULL) == $label_old) {
+        // Primary label has changed.
+        variable_set('fb_connect_primary_label', $label_new);
+      }
+
+      // fb_connect.module blocks.
+      $variable_name_old = 'fb_connect_block_login_' . $label_old;
+      $variable_name_new = 'fb_connect_block_login_' . $label_new;
+      $variable_content = variable_get($variable_name_old, NULL);
+      variable_del($variable_name_old);
+      if ($variable_content) {
+        variable_set($variable_name_new, $variable_content);
+      }
+
+      // change deltas of blocks
+      $old_delta = 'login_' . $label_old;
+      $new_delta = 'login_' . $label_new;
+
+      $ret[] = db_update('blocks')
+        ->fields(array('delta' => $new_delta))
+        ->condition('module', 'fb_module')
+        ->condition('delta', $old_delta)
+        ->execute();
+
+      // end fb_connect.module settings.
+
+    }
+  }
+  return $ret;
+}
