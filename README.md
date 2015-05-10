@@ -28,7 +28,7 @@ To compile SASS you need Compass:
 $ sudo gem install compass
 ```
 
-If you dont have Gem installed you need to install (Ruby)[https://www.ruby-lang.org/en/installation/].
+If you dont have Gem installed you need to install [Ruby](https://www.ruby-lang.org/en/installation/).
 
 # Working with Gulp
 
