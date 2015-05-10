@@ -1,0 +1,394 @@
+<?php
+
+/**
+ * @file
+ * Provides various points of integration with Google+.
+ *
+ * Currently integrated portions include:
+ * - Google+ profile reference field: stores the profile ID from a Google+
+ *   profile and formats it as a link to the profile page with an option link
+ *   title and target.
+ */
+
+// Define constants pertaining to the size of Google+ profile buttons.
+define('GOOGLEPLUS_PROFILE_BUTTON_SMALL', '16');
+define('GOOGLEPLUS_PROFILE_BUTTON_STANDARD', '32');
+define('GOOGLEPLUS_PROFILE_BUTTON_MEDIUM', '44');
+define('GOOGLEPLUS_PROFILE_BUTTON_TALL', '64');
+
+/**
+ * Implements hook_field_info().
+ */
+function googleplus_field_info() {
+  return array(
+    'googleplus_profile_reference' => array(
+      'label' => t('Google+ profile reference'),
+      'description' => t('This field stores a relationship to a profile on Google+ using its numeric profile ID.'),
+      'settings' => array(),
+      'instance_settings' => array(),
+      'default_widget' => 'googleplus_profile_textfield',
+      'default_formatter' => 'googleplus_profile_link',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_validate().
+ */
+function googleplus_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+  if ($field['type'] == 'googleplus_profile_reference') {
+    // Ensure only numeric values are entered in price fields.
+    foreach ($items as $delta => &$item) {
+      if (!empty($item['profile_id']) && !is_numeric($item['profile_id'])) {
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+          'error' => 'googleplus_profile_id',
+          'message' => t('%name: you must enter the numeric value of your Google+ profile ID as found in your profile URL.', array('%name' => $instance['label'])),
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_widget_error().
+ */
+function googleplus_field_widget_error($element, $error, $form, &$form_state) {
+  form_error($element['profile_id'], $error['message']);
+}
+
+/**
+ * Implements of hook_field_is_empty().
+ */
+function googleplus_field_is_empty($item, $field) {
+  if ($field['type'] == 'googleplus_profile_reference') {
+    return empty($item['profile_id']);
+  }
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function googleplus_field_widget_info() {
+  return array(
+    'googleplus_profile_textfield' => array(
+      'label' => t('Profile ID textfield'),
+      'field types' => array('googleplus_profile_reference'),
+      'settings' => array(
+        'size' => 30,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_settings_form().
+ */
+function googleplus_field_widget_settings_form($field, $instance) {
+  $widget = $instance['widget'];
+  $settings = array_merge(field_info_widget_settings($widget['type']), $widget['settings']);
+
+  $form = array();
+
+  // Build the settings for the product reference autocomplete widget.
+  if ($widget['type'] == 'googleplus_profile_textfield') {
+    $form['size'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Size of textfield'),
+      '#default_value' => $settings['size'],
+      '#element_validate' => array('_element_validate_integer_positive'),
+      '#required' => TRUE,
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function googleplus_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  // Return the Google+ profile textfield widget.
+  if ($instance['widget']['type'] == 'googleplus_profile_textfield') {
+    $element['profile_id'] = array(
+      '#type' => 'textfield',
+      '#title' => $element['#title'],
+      '#description' => t('Enter the numeric value of your Google+ profile ID as found in your profile URL.'),
+      '#default_value' => !empty($items[$delta]['profile_id']) ? $items[$delta]['profile_id'] : '',
+      '#field_prefix' => 'https://plus.google.com/',
+      '#size' => $instance['widget']['settings']['size'],
+      '#required' => $instance['required'],
+    );
+
+    return $element;
+  }
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function googleplus_field_formatter_info() {
+  return array(
+    'googleplus_profile_link' => array(
+      'label' => t('Google+ profile link'),
+      'field types' => array('googleplus_profile_reference'),
+      'settings' => array(
+        'override_link_title' => FALSE,
+        'link_title' => t('View profile on Google+'),
+        'target_blank' => TRUE,
+      ),
+    ),
+    'googleplus_profile_button' => array(
+      'label' => t('Google+ profile button'),
+      'field types' => array('googleplus_profile_reference'),
+      'settings' => array(
+        'button_size' => GOOGLEPLUS_PROFILE_BUTTON_STANDARD,
+        'target_blank' => TRUE,
+      ),
+    ),
+    'googleplus_profile_button_link' => array(
+      'label' => t('Google+ profile button and text link'),
+      'field types' => array('googleplus_profile_reference'),
+      'settings' => array(
+        'button_size' => GOOGLEPLUS_PROFILE_BUTTON_STANDARD,
+        'override_link_title' => FALSE,
+        'link_title' => t('View profile on Google+'),
+        'target_blank' => TRUE,
+        'target_blank' => TRUE,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function googleplus_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = array_merge(field_info_formatter_settings($display['type']), $display['settings']);
+
+  $settings_form = array();
+
+  // Add settings applying to Google+ profile buttons.
+  if (in_array($display['type'], array('googleplus_profile_button', 'googleplus_profile_button_link'))) {
+    $settings_form['button_size'] = array(
+      '#type' => 'radios',
+      '#title' => t('Button size'),
+      '#options' => googleplus_profile_button_size_name(),
+      '#default_value' => $settings['button_size'],
+    );
+  }
+
+  // Add settings applying to Google+ profile text links.
+  if (in_array($display['type'], array('googleplus_profile_link', 'googleplus_profile_button_link'))) {
+    $settings_form['override_link_title'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Override the default Google+ profile link title.'),
+      '#default_value' => $settings['override_link_title'],
+    );
+
+    $settings_form['link_title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Google+ profile link title'),
+      '#description' => t('This title will not be translatable like the default link title.'),
+      '#default_value' => $settings['link_title'],
+      '#required' => TRUE,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="fields[field_googleplus_profile][settings_edit_form][settings][override_link_title]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
+  }
+
+  // Add settings applying to all Google+ profile reference display formatters.
+  $settings_form['target_blank'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Open the link to Google+ in a new window.'),
+    '#default_value' => $settings['target_blank'],
+  );
+
+  return $settings_form;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function googleplus_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = array_merge(field_info_formatter_settings($display['type']), $display['settings']);
+
+  $summary = array();
+
+  // Add summary info for the Google+ profile button.
+  if (in_array($display['type'], array('googleplus_profile_button', 'googleplus_profile_button_link'))) {
+    // Add the button size to the summary array.
+    $summary[] = t('Button size: @size', array('@size' => googleplus_profile_button_size_name($settings['button_size'])));
+  }
+
+  // Add summary info for Google+ profile text links.
+  if (in_array($display['type'], array('googleplus_profile_link', 'googleplus_profile_button_link'))) {
+    // Add the current link title to the summary array.
+    $summary[] = t('Link title: @title', array('@title' => $settings['override_link_title'] ? $settings['link_title'] : t('View profile on Google+')));
+  }
+
+  // Add summary info for all Google+ profile reference display formatters.
+  if ($settings['target_blank']) {
+    $summary[] = t('Link will open in a new window.');
+  }
+
+  return implode('<br />', $summary);
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function googleplus_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $settings = array_merge(field_info_formatter_settings($display['type']), $display['settings']);
+
+  $element = array();
+
+  // Initialize the link options array.
+  $options = array();
+
+  // If target="_blank" is specified, add it to the options array.
+  if ($settings['target_blank']) {
+    $options['attributes']['target'] = '_blank';
+  }
+
+  // If the formatter includes an image, specify that the link title is HTML.
+  if (in_array($display['type'], array('googleplus_profile_button', 'googleplus_profile_button_link'))) {
+    $options['html'] = TRUE;
+  }
+
+  // Loop through each item in this field.
+  foreach ($items as $delta => $item) {
+    // Prepare the link title according to the display formatter.
+    switch ($display['type']) {
+      case 'googleplus_profile_link':
+        // Just use a text link for the title.
+        $title = googleplus_profile_link_title($settings);
+        break;
+
+      case 'googleplus_profile_button':
+        // Just use a profile button for the title.
+        $title = googleplus_profile_button_html($settings);
+        break;
+
+      case 'googleplus_profile_button_link':
+        // Use both the text link and profile button for the title.
+        $title = googleplus_profile_button_html($settings) . googleplus_profile_link_title($settings);
+    }
+
+    // Add the link to the returned element array.
+    $element[$delta] = array(
+      '#type' => 'link',
+      '#title' => $title,
+      '#href' => googleplus_profile_url($item['profile_id']),
+      '#options' => $options,
+    );
+  }
+
+  return $element;
+}
+
+/**
+ * Returns the title for a Google+ profile link.
+ *
+ * @param $settings
+ *   An array of display formatter settings that determines the title:
+ *   - override_link_title: boolean indicating whether or not the default link
+ *     title, Google+ profile, should be overridden.
+ *   - link_title: the title to use if the default link title should be overridden.
+ *
+ * @return
+ *   A display safe string containing the link title.
+ */
+function googleplus_profile_link_title($settings) {
+  if ($settings['override_link_title']) {
+    return check_plain($settings['link_title']);
+  }
+  else {
+    return t('View profile on Google+');
+  }
+}
+
+/**
+ * Returns the URL to a Google+ profile.
+ *
+ * @param $profile_id
+ *   The numeric ID of a Google+ profile as found in the profile URL.
+ *
+ * @return
+ *   The full URL to the profile on Google+.
+ */
+function googleplus_profile_url($profile_id) {
+  return url('https://plus.google.com/' . $profile_id, array('absolute' => TRUE));
+}
+
+/**
+ * Returns the HTML for a Google+ profile button image.
+ *
+ * @param $settings
+ *   An array of display formatter settings that determines the HTML:
+ *   - size: the size of the button image to use (see the button URL function
+ *     for a list of acceptable size constants).
+ *
+ * @return
+ *   A display safe string containing the button image HTML.
+ *
+ * @see googleplus_profile_button_url()
+ */
+function googleplus_profile_button_html($settings) {
+  return '<img src="' . googleplus_profile_button_url($settings['button_size']) . '" />';
+}
+
+/**
+ * Returns the URL to a Google+ profile button image.
+ *
+ * @param $size
+ *   The desired size of the button:
+ *   - GOOGLEPLUS_PROFILE_BUTTON_SMALL: a 16x16 pixel button
+ *   - GOOGLEPLUS_PROFILE_BUTTON_STANDARD: a 32x32 pixel button
+ *   - GOOGLEPLUS_PROFILE_BUTTON_MEDIUM: a 44x44 pixel button
+ *   - GOOGLEPLUS_PROFILE_BUTTON_TALL: a 64x64 pixel button
+ *
+ * @return
+ *   The URL to the button image of the specified size; it will respect the
+ *   protocol of the current page request to avoid error messages pertaining to
+ *   the mixing of secure / non-secure items on a page.
+ */
+function googleplus_profile_button_url($size = GOOGLEPLUS_PROFILE_BUTTON_STANDARD) {
+  return url('http://www.google.com/images/icons/ui/gprofile_button-' . $size . '.png', array('absolute' => TRUE, 'https' => !empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on'));
+}
+
+/**
+ * Returns the human readable name of the size of a profile button.
+ *
+ * @param $size
+ *   The size of a profile button using one of the defined constants. If left
+ *   empty, an array of all button size names keyed by the size constant will be
+ *   returned.
+ *
+ * @return
+ *   The translatable display safe title (or titles) of the button size. FALSE
+ *   if an invalid size was specified.
+ *
+ * @see googleplus_profile_button_url()
+ */
+function googleplus_profile_button_size_name($size = '') {
+  $sizes = array(
+    GOOGLEPLUS_PROFILE_BUTTON_SMALL => t('Small (16px)'),
+    GOOGLEPLUS_PROFILE_BUTTON_STANDARD => t('Standard (32px)'),
+    GOOGLEPLUS_PROFILE_BUTTON_MEDIUM => t('Medium (44px)'),
+    GOOGLEPLUS_PROFILE_BUTTON_TALL => t('Tall (64px)'),
+  );
+
+  if (empty($size)) {
+    return $sizes;
+  }
+  elseif (!empty($sizes[$size])) {
+    return $sizes[$size];
+  }
+
+  return FALSE;
+}

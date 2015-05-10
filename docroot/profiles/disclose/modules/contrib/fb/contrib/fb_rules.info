@@ -1,0 +1,13 @@
+name= FB Rules Integration
+description = (fb_rules.module) Provide Facebook events access and interaction through <a href=http://drupal.org/project/rules target=_blank>Rules</a>.
+package = Drupal for Facebook - contrib
+dependencies[] = fb
+dependencies[] = rules
+core = 7.x
+
+; Information added by drupal.org packaging script on 2013-10-26
+version = "7.x-3.4"
+core = "7.x"
+project = "fb"
+datestamp = "1382817027"
+

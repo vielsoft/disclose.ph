@@ -1,0 +1,61 @@
+/* Hide these classes, unless javascript shows them. */
+.fb_show {display: none;}
+.fb_connected, .fb_not_connected {display:none;}
+
+/*
+ * Make links look like facebook buttons.
+ * If you can improve this, please submit patch to http://drupal.org/project/issues/fb
+ */
+.fb_button_style {
+    display: inline-block;
+    border: 1px solid #294473;
+}
+
+.fb_button_style a:link,
+.fb_button_style a:visited,
+.fb_button_style a {
+    background:url(images/f_logo.png) center left no-repeat;
+    background-size: 22px 22px;
+    padding-left: 22px;
+    display: inline-block;
+    background-color: #5f78ab;
+}
+
+.fb_button_style a span {
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 4px;
+}
+
+.fb_button_style a div,
+.fb_button_style a span {
+    cursor: pointer;
+}
+
+/* Show spinner when reloading. */
+.fb_spinner {
+    background:url(images/fb_spinner.gif) center left no-repeat;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-left: -50px; /* half width of the spinner gif */
+    margin-top: -50px; /* half height of the spinner gif */
+    z-index:9999;
+    overflow: auto;
+    width: 100px; /* width of the spinner gif */
+    height: 102px; /*hight of the spinner gif +2px to fix IE8 issue */
+}
+
+/* Grey out entire page when reloading. */
+#fb_reload {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background:grey;
+    filter:alpha(Opacity=50);
+    opacity:0.5;
+    z-index:9998;
+}

@@ -1,0 +1,61 @@
+<?php
+/**
+ * @file
+ * Displays search results in a Masonry layout.
+ */
+
+/**
+ * Implements hook_form_FORM_ID_alter() for search_admin_settings.
+ */
+function masonry_search_form_search_admin_settings_alter(&$form, &$form_state, $form_id) {
+  // Get default values
+  $options = variable_get('masonry_search', masonry_default_options());
+  if (!isset($options['masonry'])) {
+    $options['masonry'] = 0;
+  }
+
+  // Add Masonry options to search settings form
+  $form['masonry_search'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Masonry'),
+    '#tree' => TRUE,
+  );
+  $form['masonry_search']['masonry'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable Masonry'),
+    '#description' => t("Display search results in a Masonry layout."),
+    '#default_value' => $options['masonry'],
+  );
+  if (masonry_installed()) {
+    masonry_add_options_to_form($form['masonry_search'], $options);
+
+    // Only show options when Masonry is enabled
+    foreach (masonry_default_options() as $option => $default_value) {
+      $form['masonry_search'][$option]['#states']['visible']['input.form-checkbox[name$="masonry_search[masonry]"]'] = array('checked' => TRUE);
+    }
+  }
+  else {
+    // Disable Masonry as plugin is not installed
+    $form['masonry_search']['masonry']['#disabled'] = TRUE;
+    $form['masonry_search']['masonry']['#description'] = t("This option has been disabled as the jQuery Masonry plugin is not installed.");
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for theme_search_results().
+ */
+function masonry_search_preprocess_search_results(&$variables) {
+  // Get options
+  $options = variable_get('masonry_search', masonry_default_options());
+  if (!isset($options['masonry'])) {
+    $options['masonry'] = 0;
+  }
+
+  // Display search results in a Masonry layout
+  if ($options['masonry']) {
+    $container = '.search-results';
+    $options['masonry_item_selector'] = '.search-result';
+    masonry_apply($container, $options);
+  }
+}
+

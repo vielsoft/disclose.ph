@@ -1,0 +1,11 @@
+name = FB Forms
+description = (fb_form.module) DEPRECATED! Facebook no longer supports API used by this module.  Build FBML form constructs such as <a href=http://developers.facebook.com/docs/guides/canvas/#requests target=_blank>requests</a> using Drupal's Form API.
+package = Drupal for Facebook - deprecated
+dependencies[] = fb
+core = 6.x
+; Information added by drupal.org packaging script on 2013-10-26
+version = "7.x-3.4"
+core = "7.x"
+project = "fb"
+datestamp = "1382817027"
+

@@ -1,0 +1,16 @@
+name = Facebook Apps
+description = (fb_app.module) Host and administer <a href=http://developers.facebook.com target=_blank>Facebook apps</a>.
+package = Drupal for Facebook
+core = 7.x
+
+dependencies[] = fb
+
+files[] = fb_app.module
+files[] = fb_app.install
+files[] = fb_app.admin.inc
+; Information added by drupal.org packaging script on 2013-10-26
+version = "7.x-3.4"
+core = "7.x"
+project = "fb"
+datestamp = "1382817027"
+

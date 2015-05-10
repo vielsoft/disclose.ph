@@ -1,0 +1,22 @@
+name = Facebook API
+description = (fb.module) Initializes facebook's PHP and Javascript client libraries.  Enables FBML Like buttons and other <a href=http://developers.facebook.com/plugins target=_blank>social plugins</a>.  (See <em>modules/fb/README.txt</em>.)
+
+package = Drupal for Facebook
+core = 7.x
+
+files[] = fb.module
+files[] = fb.install
+files[] = fb.admin.inc
+files[] = fb.theme.inc
+files[] = fb_url_rewrite.inc
+
+scripts[] = fb.js
+
+configure = admin/structure/fb
+
+; Information added by drupal.org packaging script on 2013-10-26
+version = "7.x-3.4"
+core = "7.x"
+project = "fb"
+datestamp = "1382817027"
+

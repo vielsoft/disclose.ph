@@ -1,0 +1,15 @@
+name = Masonry Search
+description = "Displays search results in a Masonry layout."
+core = 7.x
+package = Masonry
+
+dependencies[] = masonry (>=2.x)
+dependencies[] = search
+
+
+; Information added by drupal.org packaging script on 2013-06-16
+version = "7.x-1.0"
+core = "7.x"
+project = "masonry_search"
+datestamp = "1371359751"
+

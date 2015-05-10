@@ -1,0 +1,15 @@
+name = FB Example Customizations
+description = (fb_example.module) These hooks will make your site behave more like <a href=http://www.drupalforfacebook.org target=_blank>drupalforfacebook.org</a>.  Use this code as an example for your own customizations.
+package = Drupal for Facebook - contrib
+
+core = 7.x
+
+dependencies[] = fb
+dependencies[] = fb_app
+
+; Information added by drupal.org packaging script on 2013-10-26
+version = "7.x-3.4"
+core = "7.x"
+project = "fb"
+datestamp = "1382817027"
+
