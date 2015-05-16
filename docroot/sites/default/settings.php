@@ -567,9 +567,9 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
 # $conf['allow_authorize_operations'] = FALSE;
 
 /**
- * Local settings.php
+ * Include the local.settings.php.
  */
-$localSettings = __DIR__ . DIRECTORY_SEPARATOR . 'local.settings.php';
-if (file_exists($localSettings)) {
-  require($localSettings);
+$local_settings = __DIR__ . DIRECTORY_SEPARATOR . 'local.settings.php';
+if (file_exists($local_settings)) {
+  require($local_settings);
 }
