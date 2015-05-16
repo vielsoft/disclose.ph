@@ -6,6 +6,7 @@ An opensource community driven reporting web application based on Drupal.
 * Import the database from assets folder.
 * Copy the `default.local.settings.php` to `local.settings.php` and update the
 `$database` with correct credentials.
+* CMS login: `admin/admin`
 
 # Requirements
 * Drush
