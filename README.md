@@ -2,6 +2,11 @@ Disclose
 ========
 An opensource community driven reporting web application based on Drupal.
 
+# To install Drupal
+* Import the database from assets folder.
+* Copy the `default.local.settings.php` to `local.settings.php` and update the
+`$database` with correct credentials.
+
 # Requirements
 * Drush
 * Gulp
