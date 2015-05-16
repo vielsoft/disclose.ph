@@ -9,12 +9,14 @@ error_reporting(E_ALL);
 ini_set('display_errors', TRUE);
 ini_set('display_startup_errors', TRUE);
 
-
 /**
- * Use base url for your specific development url
+ * Use base url for your specific development url.
  */
 $base_url = 'http://disclose.ph.local';
 
+/**
+ * Database settings.
+ */
 $databases = array(
   'default' => array(
     'default' => array(
@@ -29,22 +31,11 @@ $databases = array(
   ),
 );
 
-
-/*
- * Disabling cache on local development
- *
- * This is handy when database import is done, then disable cache altogther on local dev
+/**
+ * Disabling cache on local development. This is handy when database
+ * import is done, then disable cache altogether on local dev.
  */
-
-$conf['cache'] = FALSE;
-$conf['preprocess_css'] = FALSE;
-$conf['preprocess_js'] = FALSE;
-$conf['block_cache'] = FALSE;
-
-
-/*
- * Amazon S3 bucket name
- *
- * Making sure that all local development environments have bucket name preset. Handy when forgetting to update bucket name.
- */
-$conf['amazons3_bucket'] = 'dev-insomniac';
+$conf['cache'] = 0;
+$conf['preprocess_css'] = 0;
+$conf['preprocess_js'] = 0;
+$conf['block_cache'] = 0;
