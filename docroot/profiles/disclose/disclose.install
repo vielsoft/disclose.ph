@@ -425,8 +425,9 @@ function disclose_install() {
   db_update('system')
     ->fields(array('status' => 1))
     ->condition('type', 'theme')
-    ->condition('name', 'adminimal_theme')
+    ->condition('name', 'adminimal')
     ->execute();
-  variable_set('admin_theme', 'adminimal_theme');
+  variable_set('admin_theme', 'adminimal');
   variable_set('node_admin_theme', '1');
+  variable_set('theme_default', 'disclose');
 }
