@@ -72,3 +72,32 @@ To make your development easier you can run a task which will watch your changes
 ```
 $ gulp watch
 ```
+
+# Working with issues on Github
+
+**Branching
+
+The current development branch is `develop`.
+The release branch is `release/version-[number]`.
+
+**Branch conventions
+
+* `master` - For prod releases.
+* `develop` - For development. All feature branches are fork from develop. (e.g. `feature/issue-1`)
+* `release/version-[number]` - For stable releases while the subsequent release is being merged to develop.
+* `feature/issue-[number]` - Naming convention for feature branchs. The `[number]` is refer to the Github issue number.
+* `hotfix/version-[number]-hotfix-[number]` - Naming convention for hotfixes. The `version-[number]` is the release version while the `hotfix-[number]` is the number of hotfix attempt.
+
+To close a ticket automatically via your commit:
+[Read this documentation](https://help.github.com/articles/closing-issues-via-commit-messages/)
+
+To file a new issue:
+Be sure to file your issue under the correct milestone.
+
+# Environments
+
+To access our dev and staging environment you need first to have an account on Acquia cloud. Once you have an account create an issue [here](https://github.com/geraldvillorente/disclose.ph/milestones/Contributing) that you are asking for invitation.
+
+* Prod - Currently we dont have production server. Looking for a sponsor to provide us a free server.
+* Test - [http://disclosephhogcjmdqel.devcloud.acquia-sites.com](http://disclosephhogcjmdqel.devcloud.acquia-sites.com)
+* Dev  - [http://disclosephwzybfnbsu8.devcloud.acquia-sites.com](http://disclosephwzybfnbsu8.devcloud.acquia-sites.com)
