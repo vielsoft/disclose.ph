@@ -75,12 +75,12 @@ $ gulp watch
 
 # Working with issues on Github
 
-**Branching
+**Branching**
 
 The current development branch is `develop`.
 The release branch is `release/version-[number]`.
 
-**Branch conventions
+**Branch conventions**
 
 * `master` - For prod releases.
 * `develop` - For development. All feature branches are fork from develop. (e.g. `feature/issue-1`)
