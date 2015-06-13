@@ -113,4 +113,4 @@ To access our dev and staging environment you need first to have an account on A
 
 # Communication Platform
 
-We are using Slack to communicate. Plase create a ticket on [here](https://github.com/geraldvillorente/disclose.ph/milestones/Contributing) that you are asking for invitation.
+We are using [Slack](https://disclose.slack.com) to communicate. Plase create a ticket on [here](https://github.com/geraldvillorente/disclose.ph/milestones/Contributing) that you are asking for invitation.
