@@ -12,7 +12,7 @@ ini_set('display_startup_errors', TRUE);
 /**
  * Use base url for your specific development url.
  */
-$base_url = 'http://disclose.ph.local';
+$base_url = 'http://local.disclose.ph';
 
 /**
  * Database settings.
