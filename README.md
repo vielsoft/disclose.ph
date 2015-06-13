@@ -73,14 +73,14 @@ To make your development easier you can run a task which will watch your changes
 $ gulp watch
 ```
 
-# Working with issues on Github
+# Working with Github
 
 **Branching**
 
 The current development branch is `develop`.
 The release branch is `release/version-[number]`.
 
-**Branch conventions**
+**Branch Conventions**
 
 * `master` - For prod releases.
 * `develop` - For development. All feature branches are fork from develop. (e.g. `feature/issue-1`)
@@ -88,8 +88,17 @@ The release branch is `release/version-[number]`.
 * `feature/issue-[number]` - Naming convention for feature branchs. The `[number]` is refer to the Github issue number.
 * `hotfix/version-[number]-hotfix-[number]` - Naming convention for hotfixes. The `version-[number]` is the release version while the `hotfix-[number]` is the number of hotfix attempt.
 
+**Commiting**
+
 To close a ticket automatically via your commit:
 [Read this documentation](https://help.github.com/articles/closing-issues-via-commit-messages/)
+
+**Merging** 
+
+We use PR to merge the commits. This ensure the quality and consistency of our code. See the doc [here](https://help.github.com/articles/creating-a-pull-request/). 
+Another doc [here](https://help.github.com/articles/using-pull-requests/).
+
+**Creating a New Issue**
 
 To file a new issue:
 Be sure to file your issue under the correct milestone.
@@ -101,3 +110,7 @@ To access our dev and staging environment you need first to have an account on A
 * Prod - Currently we dont have production server. Looking for a sponsor to provide us a free server.
 * Test - [http://disclosephhogcjmdqel.devcloud.acquia-sites.com](http://disclosephhogcjmdqel.devcloud.acquia-sites.com)
 * Dev  - [http://disclosephwzybfnbsu8.devcloud.acquia-sites.com](http://disclosephwzybfnbsu8.devcloud.acquia-sites.com)
+
+# Communication Platform
+
+We are using Slack to communicate. Plase create a ticket on [here](https://github.com/geraldvillorente/disclose.ph/milestones/Contributing) that you are asking for invitation.
