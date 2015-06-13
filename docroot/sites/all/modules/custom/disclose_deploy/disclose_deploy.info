@@ -1,0 +1,5 @@
+name = Disclose Deployer
+description = Deployment manager for Disclose.ph
+version = 7.x-1.0
+package = Disclose
+core = 7.x
