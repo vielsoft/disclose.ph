@@ -2,6 +2,9 @@ Disclose
 ========
 An opensource community driven reporting platform based on Drupal.
 
+* DisclosePH is a centralize repository of events (e.g crimes, weather report, natural disaster, accidents, politics, economy, opinion, etc) contributed by the public.
+* DisclosePH is free of use by public.
+
 # To install Drupal
 * Import the database from assets folder.
 * Copy the `default.local.settings.php` to `local.settings.php` and update the
