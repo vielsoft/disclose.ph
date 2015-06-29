@@ -1,6 +1,6 @@
 Disclose
 ========
-An opensource community driven reporting web application based on Drupal.
+An opensource community driven reporting platform based on Drupal.
 
 # To install Drupal
 * Import the database from assets folder.
