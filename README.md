@@ -5,7 +5,7 @@ An opensource community driven reporting web application based on Drupal.
 # To install Drupal
 * Import the database from assets folder.
 * Copy the `default.local.settings.php` to `local.settings.php` and update the
-`$database` with correct credentials.
+`$database` with the correct credentials.
 * CMS login: `admin/admin`
 
 # Requirements
@@ -22,6 +22,8 @@ $ sudo pear install drush/drush
 $ sudo drush
 $ sudo chown -R $USER:$USER ~/.drush
 ```
+
+If you're on Ubuntu you can try [this Drush installer](https://github.com/geraldvillorente/drush-installer).
 
 To install Gulp:
 ```
@@ -93,9 +95,9 @@ The release branch is `release/version-[number]`.
 To close a ticket automatically via your commit:
 [Read this documentation](https://help.github.com/articles/closing-issues-via-commit-messages/)
 
-**Merging** 
+**Merging**
 
-We use PR to merge the commits. This ensure the quality and consistency of our code. See the doc [here](https://help.github.com/articles/creating-a-pull-request/). 
+We use PR to merge the commits. This ensure the quality and consistency of our code. See the doc [here](https://help.github.com/articles/creating-a-pull-request/).
 Another doc [here](https://help.github.com/articles/using-pull-requests/).
 
 **Creating a New Issue**
