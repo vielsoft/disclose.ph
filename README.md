@@ -1,6 +1,16 @@
 Disclose
 ========
-An opensource community driven reporting web application based on Drupal.
+An opensource community driven reporting platform based on Drupal.
+
+* DisclosePH is a centralize repository of events (e.g crimes, weather report, natural disaster, accidents, politics, economy, opinion, etc) contributed by the public.
+* DisclosePH is free of use by public.
+
+# What this platform trying to solve?
+* This will allow everyone to participate in bringing the news to the rest of the community. 
+* This will serve as a platform to fight crimes.
+* Promotes transparency and bayanihan (support to fellow citizen).
+* It will provide data for statistical purposes.
+* Centralize source of information.
 
 # To install Drupal
 * Import the database from assets folder.
