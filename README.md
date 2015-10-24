@@ -126,3 +126,40 @@ To access our dev and staging environment you need first to have an account on A
 # Communication Platform
 
 We are using [Slack](https://disclose.slack.com) to communicate. Plase create a ticket on [here](https://github.com/geraldvillorente/disclose.ph/milestones/Contributing) that you are asking for invitation.
+
+# Oct 24, 2015
+# Assignments
+
+Otto
+--> Darwin Jamban
+
+Gulp and WebPack
+--> Karlo Carpio
+
+Behat
+--> Gerald and Paul
+
+Composer
+--> Eisend Briones
+
+# Front End Development
+
+ReactJS
+--> Rose Ann
+--> Karlo Carpio
+
+SASS
+--> Rose Ann
+--> Kim Paolo
+
+Ionic Framework
+--> Roald Umandal
+--> Eisend Briones
+
+MongoDB and Redis
+--> Marylyn
+--> Zaine Bautista
+
+Websocket and WebRTC
+--> Kris & EM & Roda
+
