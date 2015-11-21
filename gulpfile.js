@@ -22,4 +22,4 @@ fs.readdirSync('./gulp/').forEach(function (file) {
 });
 gulp.task('dev', ['scripts', 'styles']);
 gulp.task('build', sequence('linters', ['scripts', 'styles'], 'git-add'));
-gulp.tasl('default', ['dev']);
+gulp.task('default', ['dev']);
