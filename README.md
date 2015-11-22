@@ -6,7 +6,7 @@ An opensource community driven reporting platform based on Drupal.
 * DisclosePH is free of use by public.
 
 # What this platform trying to solve?
-* This will allow everyone to participate in bringing the news to the rest of the community. 
+* This will allow everyone to participate in bringing the news to the rest of the community.
 * This will serve as a platform to fight crimes.
 * Promotes transparency and bayanihan (support to fellow citizen).
 * It will provide data for statistical purposes.
@@ -47,6 +47,11 @@ $ sudo gem install compass
 ```
 
 If you dont have Gem installed you need to install [Ruby](https://www.ruby-lang.org/en/installation/).
+
+If you're using Ubuntu 14.04 you can install it via `apt-get`:
+```
+$ sudo apt-get install rubygems-integration
+```
 
 # Working with Gulp
 
