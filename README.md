@@ -36,9 +36,11 @@ $ sudo chown -R $USER:$USER ~/.drush
 ## PHP Code Linting
 To check your PHP for code standards and syntax, run these commands.
 
-1. `composer install`
+1. `composer install` # One time only
 1. `composer run-script phpcs`
 1. `composer run-script check-syntax`
+
+Check the coding standard here: [coding_standard.md](Drupal coding standard)
 
 ## Theme development
 If you're on Ubuntu you can try [this Drush installer](https://github.com/geraldvillorente/drush-installer).
@@ -49,7 +51,7 @@ $ sudo npm install
 $ sudo npm install gulp-cli -g
 ```
 
-###To compile SASS you need Compass:
+### To compile SASS you need Compass:
 ```
 $ sudo gem install compass
 $ sudo gem install sass
