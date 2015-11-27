@@ -40,7 +40,7 @@ To check your PHP for code standards and syntax, run these commands.
 1. `composer run-script phpcs`
 1. `composer run-script check-syntax`
 
-Check the coding standard here: [coding_standard.md](Drupal coding standard)
+Check the coding standard here: [Drupal coding standard](https://github.com/VielSoft/disclose.ph/blob/develop/coding_standard.md)
 
 ## Theme development
 If you're on Ubuntu you can try [this Drush installer](https://github.com/geraldvillorente/drush-installer).
