@@ -33,6 +33,8 @@ $ sudo drush
 $ sudo chown -R $USER:$USER ~/.drush
 ```
 
+If you're on Ubuntu you can try this alternative [this Drush installer](https://github.com/geraldvillorente/drush-installer)
+
 ## PHP Code Linting
 To check your PHP for code standards and syntax, run these commands.
 
@@ -43,7 +45,14 @@ To check your PHP for code standards and syntax, run these commands.
 Check the coding standard here: [Drupal coding standard](https://github.com/VielSoft/disclose.ph/blob/develop/coding_standard.md)
 
 ## Theme development
-If you're on Ubuntu you can try [this Drush installer](https://github.com/geraldvillorente/drush-installer).
+The Insomniac Theme is located here:
+
+* `docroot/sites/all/themes/disclose/`
+
+All the JavaScript and CSS sources are placed under the following:
+
+* `docroot/sites/all/themes/disclose/js` - JS files
+* `docroot/sites/all/themes/disclose/sass` - CSS sources written in SASS using Compass framework.
 
 To install Gulp:
 ```
