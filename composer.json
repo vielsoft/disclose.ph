@@ -1,0 +1,26 @@
+{
+    "name": "VielSoft/disclose.ph",
+    "description": "DiclosePH Drupal site",
+    "authors": [
+        {
+            "name": "Gerald Villorente",
+            "email": "geraldvillorente@gmail.com"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "drupal/coder": "~8.2",
+        "squizlabs/php_codesniffer": "~2.2"
+    },
+    "scripts": {
+        "post-install-cmd":[
+            "./vendor/bin/phpcs --config-set installed_paths `pwd`/vendor/drupal/coder/coder_sniffer"
+        ],
+        "phpcs" : [
+            "./vendor/bin/phpcs --standard=Drupal ./docroot/sites/all/modules/custom/disclose ./docroot/sites/all/themes/disclose/"
+        ],
+        "check-syntax" : [
+            "find docroot/sites/all/modules/custom/disclose docroot/sites/all/themes/disclose/ -iname \\*module -or -iname \\*php -or -iname \\*install|xargs -n 1 php -l"
+        ]
+    }
+}
