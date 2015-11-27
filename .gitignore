@@ -1,5 +1,6 @@
 # Not related to Drupal.
 node_modules
+.sass-cache
 
 # Ignore configuration files that may contain sensitive information.
 docroot/sites/*/local.settings*.php
@@ -7,3 +8,5 @@ docroot/sites/*/local.settings*.php
 # Ignore paths that contain user-generated content.
 docroot/sites/*/files
 docroot/sites/*/private
+docroot/sites/all/themes/disclose/js/scripts.js
+docroot/sites/all/themes/disclose/css/styles.css
