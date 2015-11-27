@@ -12,7 +12,7 @@ ini_set('display_startup_errors', TRUE);
 /**
  * Use base url for your specific development url.
  */
-$base_url = 'http://local.disclose.ph';
+$base_url = 'http://' . $_SERVER['HTTP_HOST'];
 
 /**
  * Database settings.
@@ -20,10 +20,10 @@ $base_url = 'http://local.disclose.ph';
 $databases = array(
   'default' => array(
     'default' => array(
-      'database' => '',
-      'username' => '',
-      'password' => '',
-      'host' => '',
+      'database' => 'YOUR_DRUPAL_DATABASE_NAME',
+      'username' => 'YOUR_MYSQL_USERNAME',
+      'password' => 'YOUR_MYSQL_PASSWORD_IF_YOU_SET_IT_OTHERWISE_BLANK',
+      'host' => 'localhost',
       'port' => '3306',
       'driver' => 'mysql',
       'prefix' => '',
@@ -39,3 +39,4 @@ $conf['cache'] = 0;
 $conf['preprocess_css'] = 0;
 $conf['preprocess_js'] = 0;
 $conf['block_cache'] = 0;
+$conf['theme_debug'] = 1;
