@@ -142,7 +142,7 @@ Be sure to file your issue under the correct milestone.
 
 ## Environments
 
-To access our dev and staging environment you need first to have an account on Acquia cloud. Once you have an account create an issue [here](https://github.com/geraldvillorente/disclose.ph/milestones/Contributing) that you are asking for invitation.
+To access our dev and staging environment you need first to have an account on Acquia cloud. Once you have an account create an issue [here](https://github.com/VielSoft/disclose.ph/milestones/Contributing) that you are asking for invitation.
 
 * Prod - Currently we dont have production server. Looking for a sponsor to provide us a free server.
 * Test - [http://disclosephhogcjmdqel.devcloud.acquia-sites.com](http://disclosephhogcjmdqel.devcloud.acquia-sites.com)
@@ -150,4 +150,4 @@ To access our dev and staging environment you need first to have an account on A
 
 ## Communication Platform
 
-We are using [Slack](https://disclose.slack.com) to communicate. Plase create a ticket on [here](https://github.com/geraldvillorente/disclose.ph/milestones/Contributing) that you are asking for invitation.
+We are using [Slack](https://disclose.slack.com) to communicate. Plase create a ticket on [here](https://github.com/VielSoft/disclose.ph/issues) that you are asking for invitation.
