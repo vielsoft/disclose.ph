@@ -100,13 +100,13 @@ All the JavaScript and CSS sources are placed under the following:
 * `docroot/sites/all/themes/disclose/js` - JS files
 * `docroot/sites/all/themes/disclose/sass` - CSS sources written in SASS using Compass framework.
 
-To install Gulp:
+**To install Gulp:**
 ```
 $ sudo npm install
 $ sudo npm install gulp-cli -g
 ```
 
-### To compile SASS you need Compass:
+**To compile SASS you need Compass:**
 ```
 $ sudo gem install compass
 $ sudo gem install sass
@@ -119,7 +119,7 @@ If you're using Ubuntu 14.04 you can install it via `apt-get`:
 $ sudo apt-get install rubygems-integration
 ```
 
-### Working with Gulp
+**Working with Gulp**
 
 Each time you change files under `sites/all/themes/disclose/` you need to run the following:
 ```
