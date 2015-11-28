@@ -93,7 +93,7 @@ Check the coding standard here: [Drupal coding standard](https://github.com/Viel
 ## Theme development
 The Insomniac Theme is located here:
 
-* `docroot/sites/all/themes/disclose/`
+* `docroot/themes/disclose/`
 
 All the JavaScript and CSS sources are placed under the following:
 
