@@ -17,10 +17,10 @@
             "./vendor/bin/phpcs --config-set installed_paths `pwd`/vendor/drupal/coder/coder_sniffer"
         ],
         "phpcs" : [
-            "./vendor/bin/phpcs --standard=Drupal ./docroot/sites/all/modules/custom/disclose ./docroot/sites/all/themes/disclose/"
+            "./vendor/bin/phpcs --standard=Drupal ./docroot/modules/custom/disclose ./docroot/themes/disclose/"
         ],
         "check-syntax" : [
-            "find docroot/sites/all/modules/custom/disclose docroot/sites/all/themes/disclose/ -iname \\*module -or -iname \\*php -or -iname \\*install|xargs -n 1 php -l"
+            "find docroot/modules/custom/disclose docroot/themes/disclose/ -iname \\*module -or -iname \\*php -or -iname \\*install|xargs -n 1 php -l"
         ]
     }
 }

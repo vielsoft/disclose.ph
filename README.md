@@ -97,8 +97,8 @@ The Insomniac Theme is located here:
 
 All the JavaScript and CSS sources are placed under the following:
 
-* `docroot/sites/all/themes/disclose/js` - JS files
-* `docroot/sites/all/themes/disclose/sass` - CSS sources written in SASS using Compass framework.
+* `docroot/themes/disclose/js` - JS files
+* `docroot/themes/disclose/sass` - CSS sources written in SASS using Compass framework.
 
 **To install Gulp:**
 ```

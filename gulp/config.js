@@ -1,6 +1,6 @@
 'use strict';
 
 module.exports = {
-  srcDir: 'docroot/sites/all/themes/disclose',
-  destDir: 'docroot/sites/all/themes/disclose'
+  srcDir: 'docroot/themes/disclose',
+  destDir: 'docroot/themes/disclose'
 };
