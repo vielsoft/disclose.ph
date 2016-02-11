@@ -18,6 +18,8 @@ An opensource community driven reporting platform based on Drupal.
 `$database` with the correct credentials.
 * CMS login: `admin/admin`
 
+### Note: There is a Drupal 8 branch already.
+
 Local settings:
 ```
 <?php
@@ -91,7 +93,7 @@ To check your PHP for code standards and syntax, run these commands.
 Check the coding standard here: [Drupal coding standard](https://github.com/VielSoft/disclose.ph/blob/develop/coding_standard.md)
 
 ## Theme development
-The Insomniac Theme is located here:
+The DisclosePH theme is located here:
 
 * `docroot/sites/all/themes/disclose/`
 
